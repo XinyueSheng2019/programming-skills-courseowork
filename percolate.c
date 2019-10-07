@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include "arralloc.h"
 #include "uni.h"
 #include "percolate.h"
@@ -15,15 +14,15 @@ int main(void)
   char* datafile;
   char* percfile;
 
-      L = 20;
-      map = (int**)arralloc(sizeof(int), 2, L + 2, L + 2);
-      rho  = 0.40;
-      seed = 1564;
-      datafile = "map.dat";
-      percfile = "map.pgm";
-      MAX = L * L;
+  L = 20;
+  map = (int**)arralloc(sizeof(int), 2, L + 2, L + 2);
+  rho  = 0.40;
+  seed = 1564;
+  datafile = "map.dat";
+  percfile = "map.pgm";
+  MAX = L * L;
 
-      rinit(seed);
+  rinit(seed);
 
   printf("Parameters are rho=%f, L=%d, seed=%d\n", rho, L, seed);
 
@@ -43,19 +42,18 @@ int main(void)
       for (j=1; j<=L; j++)
 	{
 	  r=random_uniform();
-  if(r > rho)
-   {
-      nfill++;
-      map[i][j]=1;
-    }
+  	  if(r > rho)
+   	  {
+      	    nfill++;
+      	    map[i][j]=1;
+    	  }
 	}
     }
   printf("rho = %f, actual density = %f\n",
 	 rho, 1.0 - ((double) nfill)/((double) L*L) );
 
-  /* Fix bug. */
   nfill = 0;
-              for (i=1; i<=L; i++)
+    for (i=1; i<=L; i++)
     {
       for (j=1; j<=L; j++)
 	{
@@ -65,7 +63,7 @@ int main(void)
 	      map[i][j] = nfill;
 	    }
 	}
- }
+    }
 
   int loop, nchange, old;
   loop = 1;
@@ -81,13 +79,10 @@ int main(void)
 		{
 		  old = map[i][j];
 		  if (map[i-1][j] > map[i][j]) map[i][j] = map[i-1][j];
-	      if (map[i+1][j] > map[i][j]) map[i][j] = map[i+1][j];
-      	  if (map[i][j-1] > map[i][j]) map[i][j] = map[i][j-1];
-      if (map[i][j+1] > map[i][j]) map[i][j] = map[i][j+1];
-		  if (map[i][j] != old)
-		    {
-		      nchange++;
-		    }
+	      	  if (map[i+1][j] > map[i][j]) map[i][j] = map[i+1][j];
+      	  	  if (map[i][j-1] > map[i][j]) map[i][j] = map[i][j-1];
+      		  if (map[i][j+1] > map[i][j]) map[i][j] = map[i][j+1];
+		  if (map[i][j] != old) nchange++;
 		}
 	    }
 	}
@@ -163,7 +158,7 @@ int main(void)
         {
 	  if (map[i][j] != 0)
 	    {
-	           ++(clustlist[map[i][j]-1].size);
+	      ++(clustlist[map[i][j]-1].size);
 	    }
 	}
     }
@@ -172,55 +167,54 @@ int main(void)
   for (ncluster=0; ncluster < L*L && clustlist[ncluster].size > 0; ncluster++);
   if (MAX > ncluster)
     {
-                 MAX = ncluster;
+     MAX = ncluster;
     }
   for (i=0; i < ncluster; i++)
     {
-                  rank[clustlist[i].id - 1] = i;
+     rank[clustlist[i].id - 1] = i;
     }
   printf("Opening file <%s>\n", percfile);
   fp = fopen(percfile, "w");
-  printf("Map has %d clusters, maximum cluster size is %d\n",
-	 ncluster, maxsize);
+  printf("Map has %d clusters, maximum cluster size is %d\n",ncluster, maxsize);
   if (MAX == 1)
-    {
+  {
       printf("Displaying the largest cluster\n");
-    }
-      else if (MAX == ncluster)
-        {
-          printf("Displaying all clusters\n");
-        }
+  }
+  else if (MAX == ncluster)
+  {
+      printf("Displaying all clusters\n");
+  }
   else
-    {
+  {
       printf("Displaying the largest %d clusters\n", MAX);
-    }
+  }
   printf("Writing data ...\n");
   fprintf(fp, "P2\n");
   if (MAX > 0)
-    {
+  {
       fprintf(fp, "%d %d\n%d\n", L, L, MAX);
-    }
-      else
-        {
-          fprintf(fp, "%d %d\n%d\n", L, L, 1);
-        }
+  }
+  else
+  {
+      fprintf(fp, "%d %d\n%d\n", L, L, 1);
+  }
   for (j=L; j>=1; j--)
     {
       for (i=1;i<=L; i++)
 	{
 	  colour = map[i][j];
 	  if (map[i][j] > 0)
-	    {
+	  {
 	      colour = rank[map[i][j]-1];
 	      if (colour >= MAX)
 		{
 		  colour = MAX;
 		}
-	    }
+	  }
 	  else
-	    {
+	  {
 	      colour = MAX;
-	    }
+	  }
 	  fprintf(fp, " %4d", colour);
 	}
       fprintf(fp,"\n");
@@ -230,7 +224,6 @@ fclose(fp);
 printf("File closed\n");
 free(clustlist);
 free(rank);
-
 free(map);
 }
 
