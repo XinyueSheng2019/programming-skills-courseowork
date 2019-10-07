@@ -4,7 +4,7 @@
 #include "uni.h"
 #include "percolate.h"
 
-int main(void)
+int main()
 {
   int L;
   int** map;
@@ -21,10 +21,10 @@ int main(void)
   datafile = "map.dat";
   percfile = "map.pgm";
   MAX = L * L;
-
   rinit(seed);
 
   printf("Parameters are rho=%f, L=%d, seed=%d\n", rho, L, seed);
+
 
   int nfill,i,j;
   float r;
@@ -101,11 +101,11 @@ int main(void)
   int percs = 0;
   percclusternum = 0;
 
-  for (itop=1; itop<=L; itop++)
+  for (itop = 1; itop <= L; itop++)
   {
     if (map[itop][L] > 0)
     {
-      for (ibot=1; ibot<=L; ibot++)
+      for (ibot = 1; ibot <= L; ibot++)
 	    {
 	      if (map[itop][L] == map[ibot][1])
         {
@@ -130,9 +130,9 @@ int main(void)
   fp = fopen(datafile, "w");
   printf("Writing data ...\n");
   
-  for (j=L; j>=1; j--)
+  for (j = L; j >= 1; j--)
   {
-    for (i=1;i<=L; i++)
+    for (i = 1;i <= L; i++)
     {
       fprintf(fp, " %4d", map[i][j]);
     }
@@ -168,14 +168,14 @@ int main(void)
   percsort(clustlist, L*L);
   maxsize = clustlist[0].size;
 
-  for (ncluster=0; ncluster < L*L && clustlist[ncluster].size > 0; ncluster++);
+  for (ncluster = 0; ncluster < L*L && clustlist[ncluster].size > 0; ncluster++);
   
   if (MAX > ncluster)
   {
     MAX = ncluster;
   }
 
-  for (i=0; i < ncluster; i++)
+  for (i = 0; i < ncluster; i++)
   {
     rank[clustlist[i].id - 1] = i;
   }
