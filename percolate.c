@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "arralloc.h"
 #include "percolate.h"
 #include "uni.h"
@@ -15,10 +16,11 @@ int main()
   seed = 1564;
   int MAX;
   MAX = L * L;
-  int** map; //initial the map
-  map = (int**)arralloc(sizeof(int), 2, L + 2, L + 2);
+  int** map; 
+  //set an initial map, and then send the address of this map to every function for further usages.
+  map = (int**)arralloc(sizeof(int), 2, L+2, L+2);
   rinit(seed);
-  printf("Parameters are rho=%f, L=%d, seed=%d\n", rho, L, seed);// print parapmeters
+  printf("Parameters are rho=%f, L=%d, seed=%d\n", rho, L, seed);
   
   Create_map(rho,L,(int**)map);
   Do_loop(L,(int**)map);
@@ -29,70 +31,50 @@ int main()
   
 }
 
-static int clustcompare(const void *p1, const void *p2)
-{
 
-  int size1, size2, id1, id2;
-
-  size1 = ((struct cluster *) p1)->size;
-  size2 = ((struct cluster *) p2)->size;
-
-  id1   = ((struct cluster *) p1)->id;
-  id2   = ((struct cluster *) p2)->id;
-
-  if (size1 != size2)
-    {
-      return(size2 - size1);
-    }
-  else
-    {
-      return(id2 - id1);
-    }
-}
-
-void percsort(struct cluster *list, int n) 
-{
-  qsort(list, (size_t) n, sizeof(struct cluster), clustcompare);
-}
-
+/*
+this function means to define the initial map. The rho and L are set by users. 
+Firstly, every square in this map with the extension length and width L+2,is set to be 0.
+Then,by using random number(0~1) and comparing them with rho, unfilled squares are set to 1.
+*/
 void Create_map(float rho,int L,int **map)
 {
-  int nfill;
+  int num_of_unfilled=0;
   float r;
+  int i,j;
 
-  for (int i=0; i<L+2; i++)
+  for (i = 0; i < L+2; i++)
   {
-    for (int j=0; j<L+2; j++)
+    for (j = 0; j < L+2; j++)
     {
-       map[i][j] = 0;
+      map[i][j] = 0;
     }
   }
-
-  nfill = 0;
   
-  for (int i=1; i<=L; i++)
+  for (i = 1; i <= L; i++)
   {
-    for (int j=1; j<=L; j++)
+    for (j = 1; j <= L; j++)
     {
-      r=random_uniform();
+      r = random_uniform();
       if(r > rho)
       {
-      nfill++;
-      map[i][j]=1;
+        num_of_unfilled++;
+        map[i][j] = 1;
       }
     }
   }
 
-  printf("rho = %f, actual density = %f\n",rho, 1.0 - ((double) nfill)/((double) L*L) );
-  nfill = 0;
-  for (int i=1; i<=L; i++)
+  printf("rho = %f, actual density = %f\n",rho, 1.0 - ((double)num_of_unfilled)/((double) L*L) );
+  
+  num_of_unfilled = 0;
+  for (int i = 1; i <= L; i++)
   {
-    for (int j=1; j<=L; j++)
+    for (int j = 1; j <= L; j++)
     {
       if (map[i][j] != 0)
       {
-        nfill++;
-        map[i][j] = nfill;
+        num_of_unfilled++;
+        map[i][j] = num_of_unfilled;
       }
     }
   }
@@ -108,9 +90,9 @@ void Do_loop(int L,int **map)
   while (nchange > 0)
   {
     nchange = 0;
-    for (int i=1; i<=L; i++)
+    for (int i = 1; i <= L; i++)
     {
-      for (int j=1; j<=L; j++)
+      for (int j = 1; j <= L; j++)
       {
         if (map[i][j] != 0)
         {
@@ -128,9 +110,9 @@ void Do_loop(int L,int **map)
     loop++;
   }
 
-  for (int j=L; j>=1; j--)
+  for (int j = L; j >= 1; j--)
   {
-    for (int i=1;i<=L; i++)
+    for (int i = 1;i <= L; i++)
     {
       map[i][j] = (map[i][j]*1)+0;
     }
@@ -142,11 +124,11 @@ void Percolate_result(int L,int **map)
   int itop, ibot, percclusternum;
   int percs = 0;
   percclusternum = 0;
-  for (itop=1; itop<=L; itop++)
+  for (itop = 1; itop <= L; itop++)
   {
     if (map[itop][L] > 0)
     {
-      for (ibot=1; ibot<=L; ibot++)
+      for (ibot = 1; ibot <= L; ibot++)
       {
         if (map[itop][L] == map[ibot][1])
         {
@@ -175,9 +157,9 @@ void Print_Datafile(int L,int **map)
   FILE *fp;
   fp = fopen(datafile, "w");
   printf("Writing data ...\n");
-  for (int j=L; j>=1; j--)
+  for (int j = L; j >= 1; j--)
   {
-    for (int i=1;i<=L; i++)
+    for (int i = 1;i <= L; i++)
     {
       fprintf(fp, " %4d", map[i][j]);
     }
@@ -188,19 +170,19 @@ void Print_Datafile(int L,int **map)
   printf("File closed\n");
 
 }
-void Create_clusterlist(int *MAX,int L,int **map,int *rank,int *ncluster,int *maxsize)
+void Create_clusterlist(int *MAX, int L, int **map, int *rank, int *ncluster, int *maxsize)
 {
   struct cluster *clustlist;
   clustlist = (struct cluster*)arralloc(sizeof(struct cluster), 1, L*L);
-  for (int i=0; i < L*L; i++)
+  for (int i = 0; i < L*L; i++)
   {
     rank[i] = -1;
     clustlist[i].size = 0;
     clustlist[i].id   = i+1;
   }
-  for (int i=1;i<=L; i++)
+  for (int i = 1;i <= L; i++)
   {
-    for (int j=1; j<=L; j++)
+    for (int j = 1; j <= L; j++)
     {
       if (map[i][j] != 0)
       {
@@ -216,29 +198,57 @@ void Create_clusterlist(int *MAX,int L,int **map,int *rank,int *ncluster,int *ma
   {
     *MAX = *ncluster;
   }
-  for (int i=0; i < *ncluster; i++)
+  for (int i = 0; i < *ncluster; i++)
   {
     rank[clustlist[i].id - 1] = i;
   }
   free(clustlist);
   
 }
+static int clustcompare(const void *p1, const void *p2)
+{
+
+  int size1, size2, id1, id2;
+
+  size1 = ((struct cluster *) p1)->size;
+  size2 = ((struct cluster *) p2)->size;
+
+  id1   = ((struct cluster *) p1)->id;
+  id2   = ((struct cluster *) p2)->id;
+
+  if (size1 != size2)
+  {
+    return(size2 - size1);
+  }
+  else
+  {
+    return(id2 - id1);
+  }
+}
+
+void percsort(struct cluster *list, int n) 
+{
+  qsort(list, (size_t) n, sizeof(struct cluster), clustcompare);
+}
 
 void Print_Imagefile(int L,int MAX,int **map)
 {
+  //need a struct:ncluster,maxsize,rank
   char* percfile;
   int colour;
   int *rank;
   int ncluster,maxsize;
   rank = (int*)arralloc(sizeof(int), 1, L * L);//initial the rank
   FILE *fp;
-  Create_clusterlist(&MAX,L,(int**)map,rank,&ncluster,&maxsize);
+
+  Create_clusterlist(&MAX, L, (int**)map, rank, &ncluster, &maxsize);
 
   percfile = "map.pgm";
   printf("Opening file <%s>\n", percfile);
 
   fp = fopen(percfile, "w");
   printf("Map has %d clusters, maximum cluster size is %d\n",ncluster, maxsize);
+  
   if (MAX == 1)
   {
     printf("Displaying the largest cluster\n");
@@ -251,6 +261,7 @@ void Print_Imagefile(int L,int MAX,int **map)
   {
     printf("Displaying the largest %d clusters\n", MAX);
   }
+
   printf("Writing data ...\n"); 
   
   fprintf(fp, "P2\n");
@@ -263,9 +274,10 @@ void Print_Imagefile(int L,int MAX,int **map)
   {
     fprintf(fp, "%d %d\n%d\n", L, L, 1);
   }
-  for (int j=L; j>=1; j--)
+
+  for (int j = L; j >= 1; j--)
   {
-    for (int i=1;i<=L; i++)
+    for (int i = 1;i <= L; i++)
     {
       colour = map[i][j];
       if (map[i][j] > 0)
