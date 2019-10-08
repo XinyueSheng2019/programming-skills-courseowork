@@ -22,27 +22,19 @@ int main()
   rinit(seed);
   printf("Parameters are rho=%f, L=%d, seed=%d\n", rho, L, seed);
   
-  Create_map(rho,L,(int**)map);
-  Do_loop(L,(int**)map);
-  Percolate_result(L,(int**)map);
-  Print_Datafile(L,(int**)map);
+  create_map(rho,L,(int**)map);
+  do_loop(L,(int**)map);
+  result_of_percolate(L,(int**)map);
+  print_datafile(L,(int**)map);
   Print_Imagefile(L,MAX,(int**)map);
   free(map);
   
 }
 
-
-/*
-This function means to define the initial map. 
-The rho and L are set by the user. 
-*/
-void Create_map(float rho,int L,int **map)
+//every square in this map with the extension length and width L+2,is set to be 0.
+void init_extent_map(int **map, int L)
 {
-  int num_of_unfilled=0;
-  int unique_num=0;
-  float r;
   int i,j;
-  //every square in this map with the extension length and width L+2,is set to be 0.
   for (i = 0; i < L+2; i++)
   {
     for (j = 0; j < L+2; j++)
@@ -50,7 +42,17 @@ void Create_map(float rho,int L,int **map)
       map[i][j] = 0;
     }
   }
-  //by using random number(0~1) and comparing them with rho, unfilled squares are set to 1.
+}
+
+/*
+by using random number(0~1) and comparing it with rho, the number and the coords of unfilled squares are set.
+And then those unfilled squares are set to 1.
+*/
+int set_unfilled_squares(int **map, int L, float rho)
+{
+  int num_of_unfilled = 0;
+  float r;
+  int i,j;
   for (i = 1; i <= L; i++)
   {
     for (j = 1; j <= L; j++)
@@ -63,13 +65,17 @@ void Create_map(float rho,int L,int **map)
       }
     }
   }
+  return num_of_unfilled;
+}
 
-  printf("rho = %f, actual density = %f\n",rho, 1.0 - ((double)num_of_unfilled)/((double) L*L) );
-  
-  //calculate the number of unfilled squares, and then change each of the unfilled squares with a unique positive integer.
-  for (int i = 1; i <= L; i++)
+//calculate the number of unfilled squares, and then change each of the unfilled squares with a unique positive integer.
+void set_unique_num(int **map, int L)
+{
+  int i,j;
+  int unique_num=0;
+  for (i = 1; i <= L; i++)
   {
-    for (int j = 1; j <= L; j++)
+    for (j = 1; j <= L; j++)
     {
       if (map[i][j] != 0)
       {
@@ -80,67 +86,89 @@ void Create_map(float rho,int L,int **map)
   }
 }
 
+
+//This function means to define the initial map. The rho and L are set by the user. 
+void create_map(float rho,int L,int **map)
+{
+  int i,j;
+  int num_of_unfilled;
+  
+  init_extent_map((int**)map, L);
+  num_of_unfilled = set_unfilled_squares((int**)map, L, rho);
+  printf("rho = %f, actual density = %f\n",rho, 1.0 - ((double)num_of_unfilled)/((double) L*L) );
+  set_unique_num((int**)map, L);  
+}
+
 /*
 Loop over all the squares in the grid many times, 
 and during each pass of the loop we replace each square with the maximum of its four neighbours.
 In all cases, we can ignore the filled (grey) squares. 
 The large numbers gradually fill the gaps so that each cluster eventually contains a single, unique number.
 */
-void Do_loop(int L,int **map)
+
+//replace each square with the maximum of its four neighbours
+int replace_square(int **map, int L)
 {
-  int loop, nchange, old;
-  loop = 1;
-  nchange = 1;
-  while (nchange > 0)
+  int i, j, old_num;
+  int num_of_changes = 0;
+  for (i = 1; i <= L; i++)
   {
-    nchange = 0;
-    for (int i = 1; i <= L; i++)
+    for (j = 1; j <= L; j++)
     {
-      for (int j = 1; j <= L; j++)
+      if (map[i][j] != 0)
       {
-        if (map[i][j] != 0)
-        {
-          old = map[i][j];
-          if (map[i-1][j] > map[i][j]) map[i][j] = map[i-1][j];
-          if (map[i+1][j] > map[i][j]) map[i][j] = map[i+1][j];
-          if (map[i][j-1] > map[i][j]) map[i][j] = map[i][j-1];
-          if (map[i][j+1] > map[i][j]) map[i][j] = map[i][j+1];
-          if (map[i][j] != old) nchange++;
-          
-        }
+        old_num = map[i][j];
+        if (map[i-1][j] > map[i][j]) map[i][j] = map[i-1][j];
+        if (map[i+1][j] > map[i][j]) map[i][j] = map[i+1][j];
+        if (map[i][j-1] > map[i][j]) map[i][j] = map[i][j-1];
+        if (map[i][j+1] > map[i][j]) map[i][j] = map[i][j+1];
+        if (map[i][j] != old_num) num_of_changes++;    
       }
     }
-    printf("Number of changes on loop %d is %d\n", loop, nchange);
+  }
+  return num_of_changes;
+}
+
+//Loop over all the squares in the grid many times
+void do_loop(int L,int **map)
+{ 
+  int loop = 1, num_of_changes = 1;
+
+  while (num_of_changes > 0)
+  {
+    num_of_changes = replace_square((int**)map, L);
+    printf("Number of changes on loop %d is %d\n", loop, num_of_changes);
     loop++;
   }
-
+  
 }
 
 /*
-Calculate and print the results:whether clusters percolate the map, 
+Calculate and print the results: whether clusters percolate the map, 
 if cluster does percolate, print the number of clusters which percolate the map;
 if cluster does not percolate, print this result.
 */
-void Percolate_result(int L,int **map)
-{
-  int itop, ibot;
-  int num_of_percclusters=0, percs = 0;
 
-  for (itop = 1; itop <= L; itop++)
+void result_of_percolate(int L,int **map)
+{
+  int top_row, bottom_row;
+  int num_of_percclusters=0, perc_success = 0;
+
+  for (top_row = 1; top_row <= L; top_row++)
   {
-    if (map[itop][L] > 0)
+    if (map[top_row][L] > 0)
     {
-      for (ibot = 1; ibot <= L; ibot++)
+      for (bottom_row = 1; bottom_row <= L; bottom_row++)
       {
-        if (map[itop][L] == map[ibot][1])
+        if (map[top_row][L] == map[bottom_row][1])
         {
-          percs = 1;
-          num_of_percclusters = map[itop][L];
+          perc_success = 1;
+          num_of_percclusters = map[top_row][L];
         }
       }
     }
   }
-  if (percs)
+  if (perc_success)
   {
     printf("Cluster DOES percolate. Cluster number: %d\n", num_of_percclusters);
   }
@@ -154,7 +182,8 @@ void Percolate_result(int L,int **map)
 Create a txt datafile with a user-defined name.
 Print the final map with digits in this file.
 */
-void Print_Datafile(int L,int **map)
+
+void print_datafile(int L,int **map)
 {
   char* datafile;
   //user defines the name of datafile.
@@ -193,15 +222,20 @@ void Print_Imagefile(int L,int MAX,int **map)
   int colour;
   int *rank;
   int ncluster,maxsize;
+  int i,j;
+  //user defines the name of imagefile
+  percfile = "map.pgm";
+
   rank = (int*)arralloc(sizeof(int), 1, L * L);//initial the rank
+  
   FILE *fp;
 
   Create_clusterlist(&MAX, L, (int**)map, rank, &ncluster, &maxsize);
 
-  percfile = "map.pgm";
   printf("Opening file <%s>\n", percfile);
 
   fp = fopen(percfile, "w");
+
   printf("Map has %d clusters, maximum cluster size is %d\n",ncluster, maxsize);
   
   if (MAX == 1)
@@ -230,14 +264,15 @@ void Print_Imagefile(int L,int MAX,int **map)
     fprintf(fp, "%d %d\n%d\n", L, L, 1);
   }
 
-  for (int j = L; j >= 1; j--)
+  for (j = L; j >= 1; j--)
   {
-    for (int i = 1;i <= L; i++)
+    for (i = 1;i <= L; i++)
     {
       colour = map[i][j];
       if (map[i][j] > 0)
       {
         colour = rank[map[i][j]-1];
+
         if (colour >= MAX)
         {
           colour = MAX;
@@ -247,8 +282,10 @@ void Print_Imagefile(int L,int MAX,int **map)
       {
         colour = MAX;
       }
+
       fprintf(fp, " %4d", colour);
     }
+
     fprintf(fp,"\n");
   }
 
@@ -259,21 +296,23 @@ void Print_Imagefile(int L,int MAX,int **map)
 }
 
 /*
-
+Create the clusterlist.
 */
 void Create_clusterlist(int *MAX, int L, int **map, int *rank, int *ncluster, int *maxsize)
 {
+  int i,j;
   struct cluster *clustlist;
   clustlist = (struct cluster*)arralloc(sizeof(struct cluster), 1, L*L);
-  for (int i = 0; i < L*L; i++)
+  //calculate the size of cluster
+  for (i = 0; i < L*L; i++)
   {
     rank[i] = -1;
     clustlist[i].size = 0;
     clustlist[i].id   = i+1;
   }
-  for (int i = 1;i <= L; i++)
+  for (i = 1;i <= L; i++)
   {
-    for (int j = 1; j <= L; j++)
+    for (j = 1; j <= L; j++)
     {
       if (map[i][j] != 0)
       {
@@ -289,7 +328,7 @@ void Create_clusterlist(int *MAX, int L, int **map, int *rank, int *ncluster, in
   {
     *MAX = *ncluster;
   }
-  for (int i = 0; i < *ncluster; i++)
+  for (i = 0; i < *ncluster; i++)
   {
     rank[clustlist[i].id - 1] = i;
   }
@@ -315,6 +354,7 @@ static int clustcompare(const void *p1, const void *p2)
   {
     return(id2 - id1);
   }
+
 }
 
 void percsort(struct cluster *list, int n) 
