@@ -10,6 +10,7 @@ calculate: ${OBJ} scheduler
 
 scheduler: ${OBJ} ${INC}
 	${CC} ${OBJ} -o $@
+	rm *.o
 
 .PHONY: checksum
 checksum: output.txt check.txt map.dat map.pgm
@@ -19,8 +20,9 @@ output.txt: scheduler
 check.txt: output.txt map.dat map.pgm
 	cksum output.txt >> check.txt
 	cksum map.dat map.pgm >> check.txt
+	rm output.txt
 
 .PHONY: clean
 clean:
-	rm *.o map.* scheduler 
+	rm map.dat map.pgm scheduler 
 
