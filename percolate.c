@@ -20,6 +20,21 @@ int main(int argc, char* argv[])
   datafile_name = argv[5];
   char* imagefile_name;
   imagefile_name = argv[6];
+  int opt;
+ /*
+  while((opt = getopt(argc,argv,":l:r:s:m:df:gf:"))!=-1)
+  {
+    switch(opt)
+    {
+      case 'l':
+        printf("%s\n", );
+    }
+  }
+
+*/
+
+
+
 
   printf("L: %d ",L);
   printf("rho: %f ", rho);
@@ -27,7 +42,9 @@ int main(int argc, char* argv[])
   printf("MAX: %d ", MAX);
   printf("datafile_name: %s ", datafile_name);
   printf("imagefile_name: %s\n",imagefile_name);
+
   percolate_processing(rho, L, MAX, seed, datafile_name,imagefile_name);
+
   return 0;
 }
 
@@ -171,23 +188,9 @@ void result_of_percolate(int L,int **map)
 if cluster does percolate, print the number of clusters which percolate the map;
 if cluster does not percolate, print this result.*/
 
-  int top_row, bottom_row;
   int num_of_percclusters=0, perc_success = 0;
+  judge_percolate(&num_of_percclusters, &perc_success, (int**)map, L);
 
-  for (top_row = 1; top_row <= L; top_row++)
-  {
-    if (map[top_row][L] > 0)
-    {
-      for (bottom_row = 1; bottom_row <= L; bottom_row++)
-      {
-        if (map[top_row][L] == map[bottom_row][1])
-        {
-          perc_success = 1;
-          num_of_percclusters = map[top_row][L];
-        }
-      }
-    }
-  }
   if (perc_success)
   {
     printf("Cluster DOES percolate. Cluster number: %d\n", num_of_percclusters);
@@ -198,6 +201,26 @@ if cluster does not percolate, print this result.*/
   }
 }
 
+void judge_percolate(int *num_of_percclusters, int *perc_success, int **map, int L)
+{
+  /* Judge whether there is a cluster which percolates the map. */
+  int top_row, bottom_row;
+
+  for (top_row = 1; top_row <= L; top_row++)
+  {
+    if (map[top_row][L] > 0)
+    {
+      for (bottom_row = 1; bottom_row <= L; bottom_row++)
+      {
+        if (map[top_row][L] == map[bottom_row][1])
+        {
+          *perc_success = 1;
+          *num_of_percclusters = map[top_row][L];
+        }
+      }
+    }
+  }
+}
 
 void print_datafile(int L,int **map, char* datafile)
 {
@@ -238,19 +261,25 @@ Print the final map with different gray colours in this file. */
   int *rank;
   int num_of_clusters, maxsize;
   int i,j;
+
   FILE *fp;
   fp = fopen(percfile, "w");
+
   printf("Opening file <%s>\n", percfile);
+
   rank = (int*)arralloc(sizeof(int), 1, L * L);
+
   create_clusterlist(&MAX, L, (int**)map, rank, &num_of_clusters, &maxsize);
 
   printf("Map has %d clusters, maximum cluster size is %d\n",num_of_clusters, maxsize);
+  
   judge_MAX(&MAX, &num_of_clusters);
 
   printf("Writing data ...\n");  
   fprintf(fp, "P2\n");
 
   print_MAX(&MAX, fp, L);
+
   convert_cluster_to_colour((int**)map, L, &MAX, rank, fp );
 
   printf("...done\n");
@@ -276,6 +305,7 @@ void create_clusterlist(int *MAX, int L, int **map, int *rank, int *num_of_clust
 void calculate_cluster_size(int L, struct cluster *clustlist, int **map, int *rank)
 {
   /* calculate the size of cluster */
+
   int i,j;
   for (i = 0; i < L*L; i++)
   {
@@ -298,6 +328,8 @@ void calculate_cluster_size(int L, struct cluster *clustlist, int **map, int *ra
 
 void percsort(struct cluster *list, int n) 
 {
+  /* Sort clusters by size. */
+
   qsort(list, (size_t) n, sizeof(struct cluster), clustcompare);
 }
 
@@ -327,6 +359,7 @@ static int clustcompare(const void *p1, const void *p2)
 void set_cluster_num(int *maxsize, struct cluster *clustlist, int *num_of_clusters, int *rank, int *MAX, int L)
 {
   /* Set a number for every cluster*/
+
   int i;
 
   *maxsize = clustlist[0].size;
@@ -362,21 +395,21 @@ void judge_MAX(int *MAX, int *num_of_clusters)
   }
 }
 
-void print_MAX(int *MAX, FILE *fp, int L)
+void print_MAX(int *MAX, FILE *input_file, int L)
 {
   /* present the MAX value */
 
   if (*MAX > 0)
   {
-    fprintf(fp, "%d %d\n%d\n", L, L, *MAX);
+    fprintf(input_file, "%d %d\n%d\n", L, L, *MAX);
   }
   else
   {
-    fprintf(fp, "%d %d\n%d\n", L, L, 1);
+    fprintf(input_file, "%d %d\n%d\n", L, L, 1);
   }
 }
 
-void convert_cluster_to_colour(int **map, int L, int *MAX, int *rank, FILE *fp )
+void convert_cluster_to_colour(int **map, int L, int *MAX, int *rank, FILE *input_file )
 {
   /* Clusters are converted to colours */
 
@@ -401,10 +434,10 @@ void convert_cluster_to_colour(int **map, int L, int *MAX, int *rank, FILE *fp )
         colour = *MAX;
       }
 
-      fprintf(fp, " %4d", colour);
+      fprintf(input_file, " %4d", colour);
     }
 
-    fprintf(fp,"\n");
+    fprintf(input_file,"\n");
   }
 }
 
