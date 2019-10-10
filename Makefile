@@ -24,5 +24,5 @@ check.txt: output.txt map.dat map.pgm
 
 .PHONY: clean
 clean:
-	rm map.dat map.pgm scheduler 
+	rm map.dat *.pgm *.txt scheduler 
 

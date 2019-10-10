@@ -6,21 +6,32 @@
 #include "uni.h"
 
 
-int main()
+int main(int argc, char* argv[])
 {
   int L;
-  L=20;
+  L = atoi(argv[1]);
   float rho;
-  rho = 0.40;
+  rho = atof(argv[2]);
   int seed;
-  seed = 1564;
+  seed = atoi(argv[3]);
   int MAX;
-  MAX = L * L;
-  percolate_processing(rho, L, MAX, seed);
-   
+  MAX = atoi(argv[4]);
+  char* datafile_name;
+  datafile_name = argv[5];
+  char* imagefile_name;
+  imagefile_name = argv[6];
+
+  printf("L: %d ",L);
+  printf("rho: %f ", rho);
+  printf("seed: %d ", seed);
+  printf("MAX: %d ", MAX);
+  printf("datafile_name: %s ", datafile_name);
+  printf("imagefile_name: %s\n",imagefile_name);
+  percolate_processing(rho, L, MAX, seed, datafile_name,imagefile_name);
+  return 0;
 }
 
-void percolate_processing(float rho, int L, int MAX, int seed)
+void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_name, char* imagefile_name)
 {
   /*set an initial map, and then send the address of this map to every function for further usages.*/
 
@@ -31,8 +42,8 @@ void percolate_processing(float rho, int L, int MAX, int seed)
   create_map(rho,L,(int**)map);
   do_loop(L,(int**)map);
   result_of_percolate(L,(int**)map);
-  print_datafile(L,(int**)map);
-  print_imagefile(L,MAX,(int**)map); 
+  print_datafile(L,(int**)map, datafile_name);
+  print_imagefile(L,MAX,(int**)map, imagefile_name); 
   free(map);
 }
 
@@ -188,26 +199,11 @@ if cluster does not percolate, print this result.*/
 }
 
 
-
-/*****************************************************************
-*Function://函数名称
-*Description://函数功能，性能等的描述
-*Calls://备货单本函数调用的函数清单
-*Called By://调用的本函数的清单
-*Input://输入参数说明，包括每个参数的作用、取值说明及参数间关系
-*Output://输出参数的说明
-*Return://函数返回值的说明
-*Others://其他说明
-*****************************************************************/
-
-void print_datafile(int L,int **map)
+void print_datafile(int L,int **map, char* datafile)
 {
   /* Create a txt datafile with a user-defined name.
 Print the final map with digits in this file.*/
 
-  char* datafile;
-  //user defines the name of datafile.
-  datafile = "map.dat"; 
   printf("Opening file <%s>\n", datafile);
   FILE *fp;
   fp = fopen(datafile, "w");
@@ -234,18 +230,14 @@ void print_digitmap(int L,FILE *input_file, int **map)
   }
 }
 
-void print_imagefile(int L,int MAX,int **map)
+void print_imagefile(int L,int MAX,int **map, char* percfile)
 {
   /* Create an imagefile with a user-defined name.
 Print the final map with different gray colours in this file. */
 
-  char* percfile;
-
   int *rank;
   int num_of_clusters, maxsize;
   int i,j;
-  //user defines the name of imagefile
-  percfile = "map.pgm";
   FILE *fp;
   fp = fopen(percfile, "w");
   printf("Opening file <%s>\n", percfile);
