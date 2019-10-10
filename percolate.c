@@ -13,7 +13,12 @@ int main(int argc, char* argv[])
   float rho;
   char* datafile_name;
   char* imagefile_name; 
-
+  L = 20;
+  rho = 0.400000;
+  seed = 1564;
+  MAX = L*L;
+  datafile_name = "map.dat";
+  imagefile_name = "map.pgm";
 
   while((opt = getopt(argc,argv,":l:r:s:m:d:g:"))!=-1)
   {
@@ -40,13 +45,6 @@ int main(int argc, char* argv[])
 
     }
   }
-  if(L == 0) L = 20;
-  if(rho == 0) rho = 0.400000;
-  if(seed == 0) seed = 1564;
-  if(MAX == 0) MAX = L*L;
-  if(datafile_name == NULL) datafile_name = "map.dat";
-  if(imagefile_name == NULL) imagefile_name = "map.pgm";
-
   printf("**************************************\nHere are parameters:\n(Unset parameters have been given original values.)\nL   : %d\nrho : %f\nseed: %d\nMAX : %d\ndatafile_name : %s\nimagefile_name: %s\n**************************************\n", L, rho, seed, MAX, datafile_name, imagefile_name);
   
   percolate_processing(rho, L, MAX, seed, datafile_name, imagefile_name);
