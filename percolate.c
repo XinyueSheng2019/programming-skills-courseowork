@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "arralloc.h"
 #include "percolate.h"
@@ -8,44 +9,49 @@
 
 int main(int argc, char* argv[])
 {
-  int L;
-  L = atoi(argv[1]);
+  int L, seed, MAX, opt;
   float rho;
-  rho = atof(argv[2]);
-  int seed;
-  seed = atoi(argv[3]);
-  int MAX;
-  MAX = atoi(argv[4]);
   char* datafile_name;
-  datafile_name = argv[5];
-  char* imagefile_name;
-  imagefile_name = argv[6];
-  int opt;
- /*
-  while((opt = getopt(argc,argv,":l:r:s:m:df:gf:"))!=-1)
+  char* imagefile_name; 
+
+
+  while((opt = getopt(argc,argv,":l:r:s:m:d:g:"))!=-1)
   {
     switch(opt)
     {
       case 'l':
-        printf("%s\n", );
+        L = atoi(optarg);
+        break;
+      case 'r':
+        rho = atof(optarg);
+        break;
+      case 's':
+        seed = atoi(optarg);
+        break;
+      case 'm':
+        MAX = atoi(optarg);
+        break;
+      case 'd':
+        datafile_name = optarg;
+        break;
+      case 'g':
+        imagefile_name = optarg;
+        break;
+
     }
   }
+  if(L == 0) L = 20;
+  if(rho == 0) rho = 0.400000;
+  if(seed == 0) seed = 1564;
+  if(MAX == 0) MAX = L*L;
+  if(datafile_name == NULL) datafile_name = "map.dat";
+  if(imagefile_name == NULL) imagefile_name = "map.pgm";
 
-*/
-
-
-
-
-  printf("L: %d ",L);
-  printf("rho: %f ", rho);
-  printf("seed: %d ", seed);
-  printf("MAX: %d ", MAX);
-  printf("datafile_name: %s ", datafile_name);
-  printf("imagefile_name: %s\n",imagefile_name);
-
-  percolate_processing(rho, L, MAX, seed, datafile_name,imagefile_name);
-
+  printf("**************************************\nHere are parameters:\n(Unset parameters have been given original values.)\nL   : %d\nrho : %f\nseed: %d\nMAX : %d\ndatafile_name : %s\nimagefile_name: %s\n**************************************\n", L, rho, seed, MAX, datafile_name, imagefile_name);
+  
+  percolate_processing(rho, L, MAX, seed, datafile_name, imagefile_name);
   return 0;
+
 }
 
 void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_name, char* imagefile_name)
@@ -55,7 +61,6 @@ void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_na
   int** map; 
   map = (int**)arralloc(sizeof(int), 2, L+2, L+2);
   rinit(seed);
-  printf("Parameters are rho=%f, L=%d, seed=%d\n", rho, L, seed);
   create_map(rho,L,(int**)map);
   do_loop(L,(int**)map);
   result_of_percolate(L,(int**)map);
@@ -65,7 +70,7 @@ void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_na
 }
 
 
-void create_map(float rho,int L,int **map)
+void create_map(float rho, int L, int **map)
 {
   /* This function means to define the initial map. The rho and L are set by the user. */
 
@@ -136,7 +141,7 @@ void set_unique_num(int **map, int L)
 }
 
 
-void do_loop(int L,int **map)
+void do_loop(int L, int **map)
 { 
 /* Loop over all the squares in the grid many times, 
 and during each pass of the loop we replace each square 
@@ -203,7 +208,7 @@ if cluster does not percolate, print this result.*/
 
 void judge_percolate(int *num_of_percclusters, int *perc_success, int **map, int L)
 {
-  /* Judge whether there is a cluster which percolates the map. */
+  /* Judge whether there is at least a cluster which percolates the map. */
   int top_row, bottom_row;
 
   for (top_row = 1; top_row <= L; top_row++)
@@ -222,7 +227,7 @@ void judge_percolate(int *num_of_percclusters, int *perc_success, int **map, int
   }
 }
 
-void print_datafile(int L,int **map, char* datafile)
+void print_datafile(int L, int **map, char* datafile)
 {
   /* Create a txt datafile with a user-defined name.
 Print the final map with digits in this file.*/
@@ -238,7 +243,7 @@ Print the final map with digits in this file.*/
 
 }
 
-void print_digitmap(int L,FILE *input_file, int **map)
+void print_digitmap(int L, FILE *input_file, int **map)
 {
   /* Print digital map.*/
   
@@ -253,7 +258,7 @@ void print_digitmap(int L,FILE *input_file, int **map)
   }
 }
 
-void print_imagefile(int L,int MAX,int **map, char* percfile)
+void print_imagefile(int L, int MAX, int **map, char* percfile)
 {
   /* Create an imagefile with a user-defined name.
 Print the final map with different gray colours in this file. */
