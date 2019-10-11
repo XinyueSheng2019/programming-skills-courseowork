@@ -6,11 +6,12 @@ INC = arralloc.c uni.c percolate.c
 .PHONY: calculate
 calculate: ${OBJ} a.out
 .c.o:
-	${CC} -c $<
+	gcc -c $<
 
 a.out: ${OBJ} ${INC}
-	${CC} ${OBJ} -o $@
+	gcc ${OBJ} -o $@
 	rm *.o
+
 .PHONY: clean
 clean:
 	rm *.dat *.pgm *.txt a.out 
