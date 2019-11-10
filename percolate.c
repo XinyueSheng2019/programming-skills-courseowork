@@ -10,19 +10,17 @@
 
 int main(int argc, char* argv[])
 {
-  int L, seed, MAX, opt;
+  int L, seed, MAX, opt, valid_result;
   float rho;
-  char* datafile = "map";
-  char* imagefile = "map";
-  char* format_dat = ".dat";
-  char* format_pgm = ".pgm";
-  char s1[100];
-  char *m_file = s1;
-  char *datafile_name = &(*m_file);
-  L    = 20;
-  rho  = 0.400000;
+  char* datafile_name;
+  char* imagefile_name; 
+  L = 20;
+  rho = 0.400000;
   seed = 1564;
-  MAX  = L*L;
+  MAX = L*L;
+  datafile_name = "map.dat";
+  imagefile_name = "map.pgm";
+
 
   while((opt = getopt(argc,argv,":l:r:s:m:d:g:"))!=-1)
   {
@@ -41,70 +39,17 @@ int main(int argc, char* argv[])
         MAX = atoi(optarg);
         break;
       case 'd':
-        datafile = optarg;
+        datafile_name = optarg;
         break;
       case 'g':
-        imagefile = optarg;
+        imagefile_name = optarg;
         break;
 
     }
   }
-  /*judge the validation of parameters*/
-    if (L < 1)
-    {
-      printf("map width and height should be no less than 1. \n");
-      return 0;
-    }
-    if (rho < 0 || rho > 1)
-    {
-      printf("The value of ρ should be between 0 and 1.\n ");
-      return 0;
-    }
-    if (seed < 0 || seed > 900000000)
-    {
-      printf("The value of seed should be between 0 and 900000000. \n");
-      return 0;
-    }
-    if (MAX < 0 || MAX > L * L)
-    {
-      printf("The value of MAX should be between 0 and L*L. \n");
-      return 0;
-    }
-   
-
-    while(*datafile != '\0')
-    {
-      *m_file = *datafile;
-      datafile++;
-      m_file++;
-    }
-    while(*format_dat != '\0')
-    {
-      *m_file = *format_dat;
-      format_dat++;
-      m_file++;
-    }
-    *m_file = '\0';
-    datafile = &(*m_file);
-
-    char s2[100];
-    m_file = &(*s2);
-    char *imagefile_name = &(*m_file);
-    while(*imagefile != '\0')
-    {
-      *m_file = *imagefile;
-      imagefile++;
-      m_file++;
-    }
-    while(*format_pgm != '\0')
-    {
-      *m_file = *format_pgm;
-      format_pgm++;
-      m_file++;
-    }
-    *m_file = '\0';
-    imagefile = &(*m_file);
-
+  valid_result = judge_validation_of_command_lines(L, rho, seed, MAX);
+  
+  if (valid_result == -1) return 0;
 
   printf("**************************************\nHere are parameters:\n(Unset parameters have been given original values.)\nL   : %d\nrho : %f\nseed: %d\nMAX : %d\ndatafile_name : %s\nimagefile_name: %s\n**************************************\n", L, rho, seed, MAX, datafile_name, imagefile_name);
   
@@ -112,6 +57,32 @@ int main(int argc, char* argv[])
 
   return 0;
 
+}
+
+int judge_validation_of_command_lines(int L, int rho, int seed, int MAX)
+{
+/*judge the validation of parameters*/
+  if (L < 1)
+  {
+    printf("map width and height should be no less than 1. \n");
+    return -1;
+  }
+  if (rho < 0 || rho > 1)
+  {
+    printf("The value of ρ should be between 0 and 1.\n ");
+    return -1;
+  }
+  if (seed < 0 || seed > 900000000)
+  {
+    printf("The value of seed should be between 0 and 900000000. \n");
+    return -1;
+  }
+  if (MAX < 0 || MAX > L * L)
+  {
+    printf("The value of MAX should be between 0 and L*L. \n");
+    return -1;
+  }
+  return 0;
 }
 
 void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_name, char* imagefile_name)

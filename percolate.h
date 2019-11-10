@@ -4,15 +4,14 @@ struct cluster
   int size;
 };
 
-struct command_line_para
+struct command_line
 {
   int L, seed, MAX, opt;
   float rho;
   char* datafile;
   char* imagefile;
   char* format_dat;
-  char* format_pgm;
-  
+  char* format_pgm; 
 };
 
 struct percolation_related
@@ -36,11 +35,10 @@ struct grid_related
   int num_of_unfilled;
   int unique_num;
   float r;
-
 };
 
 
-
+int judge_validation_of_command_lines(int L, int rho, int seed, int MAX);
 void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_name, char* imagefile_name);
 void create_map(float rho, int L, int **map);
 void init_extent_map(int **map, int L);
