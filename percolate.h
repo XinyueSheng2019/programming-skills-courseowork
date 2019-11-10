@@ -14,22 +14,28 @@ struct command_line_para
   char* format_pgm;
   
 };
+
 struct percolation_related
 {
-  int num_of_unfilled, unique_num, num_of_changes, old_num;
+  int loop;
+  int num_of_changes, old_num;
   int num_of_percclusters, perc_success;
-  int top_row, bottom_row;
-  float r;
-
+  int top_row, bottom_row;  
 };
+
 struct output_related
 {
   int *rank;
   int num_of_clusters, maxsize;
   int colour;
 };
+
 struct grid_related
 {
+  int** map; 
+  int num_of_unfilled;
+  int unique_num;
+  float r;
 
 };
 
