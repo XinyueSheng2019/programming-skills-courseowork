@@ -4,104 +4,102 @@
 
 #include "arralloc.h"
 #include "percwrite.h"
+#include "percolate.h"
 #include "uni.h"
 
 
 
-void print_datafile(int L, int **map, char* datafile)
+void print_datafile(struct grid_related* grid, struct command_line* p, struct output_related *output)
 {
   /* Create a txt datafile with a user-defined name. Print the final map with digits in this file.*/
 
-  printf("Opening file <%s>\n", datafile);
-  FILE *fp;
-  fp = fopen(datafile, "w");
+  printf("Opening file <%s>\n", p->datafile_name);
+  // FILE *fp;
+  output->fp1 = fopen(p->datafile_name, "w");
   printf("Writing data ...\n");
-  print_digitmap(L,fp, (int**)map);
+  print_digitmap(grid,p,output);
   printf("...done\n");
-  fclose(fp);
+  fclose(output->fp1);
   printf("File closed\n");
 
 }
 
-void print_digitmap(int L, FILE *input_file, int **map)
+void print_digitmap(struct grid_related* grid, struct command_line* p, struct output_related *output)
 {
   /* Print digital map.*/
   
   int i,j;
-  for (j = L; j >= 1; j--)
+  for (j = p->L; j >= 1; j--)
   {
-    for (i = 1;i <= L; i++)
+    for (i = 1;i <= p->L; i++)
     {
-      fprintf(input_file, " %4d", map[i][j]);
+      fprintf(output->fp1, " %4d", grid->map[i][j]);
     }
-    fprintf(input_file,"\n");
+    fprintf(output->fp1,"\n");
   }
 }
 
-void print_imagefile(int L, int MAX, int **map, char* percfile)
+void print_imagefile(struct grid_related* grid, struct command_line* p, struct output_related *output)
 {
   /* Create an imagefile with a user-defined name. Print the final map with colours of different gray levels in this file. */
 
-  int *rank;
-  int num_of_clusters, maxsize;
   int i,j;
 
-  FILE *fp;
-  fp = fopen(percfile, "w");
-  printf("Opening file <%s>\n", percfile);
+  output->fp2 = fopen(p->imagefile_name, "w");
+  printf("Opening file <%s>\n", p->imagefile_name);
 
-  rank = (int*)arralloc(sizeof(int), 1, L * L);
+  output->rank = (int*)arralloc(sizeof(int), 1, p->L * p->L);
 
-  create_clusterlist(&MAX, L, (int**)map, rank, &num_of_clusters, &maxsize);
-  printf("Map has %d clusters, maximum cluster size is %d\n", num_of_clusters, maxsize);
-  judge_MAX(&MAX, &num_of_clusters);
+  create_clusterlist(grid, p, output);
+  printf("Map has %d clusters, maximum cluster size is %d\n", output->num_of_clusters, output->maxsize);
+  judge_MAX(p, output);
   printf("Writing data ...\n");  
-  fprintf(fp, "P2\n");
-  print_MAX(&MAX, fp, L);
-  convert_cluster_to_colour((int**)map, L, &MAX, rank, fp );
+  fprintf(output->fp2, "P2\n");
+  print_MAX(p, output);
+  convert_cluster_to_colour(grid, p, output);
   printf("...done\n");
-  fclose(fp);
+  fclose(output->fp2);
   printf("File closed\n"); 
 
-  free(rank);
+  free(output->rank);
 }
 
-void create_clusterlist(int *MAX, int L, int **map, int *rank, int *num_of_clusters, int *maxsize)
+void create_clusterlist(struct grid_related* grid, struct command_line* p, struct output_related *output)
 {
   /* Create the array of clusters, and calculate the size of each cluster, and then sort them by their sizes.
    Finally, set a unique number for every cluster. */
 
   int i,j;
   struct cluster *clustlist;
-  clustlist = (struct cluster*)arralloc(sizeof(struct cluster), 1, L*L);
+  clustlist = (struct cluster*)arralloc(sizeof(struct cluster), 1, p->L*p->L);
 
-  calculate_cluster_size(L, clustlist, (int**)map, rank);
-  percsort(clustlist, L*L);
-  set_cluster_num(maxsize, clustlist, num_of_clusters, rank, MAX, L);
+  calculate_cluster_size(clustlist, grid, p, output);
+  percsort(clustlist, p->L*p->L);
+  set_cluster_num(clustlist, p, output);
 
   free(clustlist);
   
 }
 
-void calculate_cluster_size(int L, struct cluster *clustlist, int **map, int *rank)
+void calculate_cluster_size(struct cluster *clustlist, struct grid_related* grid, struct command_line* p, struct output_related *output)
 {
   /* calculate the size of cluster */
 
   int i,j;
-  for (i = 0; i < L*L; i++)
+  for (i = 0; i < p->L*p->L; i++)
   {
-    rank[i] = -1;
+    output->rank[i] = -1;
     clustlist[i].size = 0;
     clustlist[i].id   = i+1;
   }
 
-  for (i = 1; i <= L; i++)
+  for (i = 1; i <= p->L; i++)
   {
-    for (j = 1; j <= L; j++)
+    for (j = 1; j <= p->L; j++)
     {
-      if (map[i][j] != 0)
+      if (grid->map[i][j] != 0)
       {
-        ++(clustlist[map[i][j]-1].size);
+        ++(clustlist[grid->map[i][j]-1].size);
       }
     }
   }
@@ -137,89 +135,88 @@ static int clustcompare(const void *p1, const void *p2)
 
 }
 
-void set_cluster_num(int *maxsize, struct cluster *clustlist, int *num_of_clusters, int *rank, int *MAX, int L)
+void set_cluster_num(struct cluster *clustlist, struct command_line* p, struct output_related *output)
 {
   /* Set a number for every cluster*/
 
   int i;
 
-  *maxsize = clustlist[0].size;
+  output->maxsize = clustlist[0].size;
 
-  for (*num_of_clusters = 0; *num_of_clusters < L*L && clustlist[*num_of_clusters].size > 0; (*num_of_clusters)++);
+  for (output->num_of_clusters = 0; output->num_of_clusters < p->L*p->L && clustlist[output->num_of_clusters].size > 0; (output->num_of_clusters)++);
   
-  if (*MAX > *num_of_clusters)
+  if (p->MAX > output->num_of_clusters)
   {
-    *MAX = *num_of_clusters;
+    p->MAX = output->num_of_clusters;
   }
 
-  for (i = 0; i < *num_of_clusters; i++)
+  for (i = 0; i < output->num_of_clusters; i++)
   {
-    rank[clustlist[i].id - 1] = i;
+    output->rank[clustlist[i].id - 1] = i;
   }
 
 }
 
-void judge_MAX(int *MAX, int *num_of_clusters)
+void judge_MAX(struct command_line* p, struct output_related *output)
 {
   /* By judging the value of MAX, print the number of clusters. */
 
-  if (*MAX == 1)
+  if (p->MAX == 1)
   {
     printf("Displaying the largest cluster\n");
   }
-  else if (*MAX == *num_of_clusters)
+  else if (p->MAX == output->num_of_clusters)
   {
     printf("Displaying all clusters\n");
   }
   else
   {
-    printf("Displaying the largest %d clusters\n", *MAX);
+    printf("Displaying the largest %d clusters\n", p->MAX);
   }
 }
 
-void print_MAX(int *MAX, FILE *input_file, int L)
+void print_MAX(struct command_line* p, struct output_related *output)
 {
   /* present the MAX value */
 
-  if (*MAX > 0)
+  if (p->MAX > 0)
   {
-    fprintf(input_file, "%d %d\n%d\n", L, L, *MAX);
+    fprintf(output->fp2, "%d %d\n%d\n", p->L, p->L, p->MAX);
   }
   else
   {
-    fprintf(input_file, "%d %d\n%d\n", L, L, 1);
+    fprintf(output->fp2, "%d %d\n%d\n", p->L, p->L, 1);
   }
 }
 
-void convert_cluster_to_colour(int **map, int L, int *MAX, int *rank, FILE *input_file )
+void convert_cluster_to_colour(struct grid_related* grid, struct command_line* p, struct output_related *output)
 {
   /* Clusters are converted to colours */
 
   int i,j;
-  int colour;
 
-  for (j = L; j >= 1; j--)
+  for (j = p->L; j >= 1; j--)
   {
-    for (i = 1;i <= L; i++)
+    for (i = 1;i <= p->L; i++)
     {
-      if (map[i][j] > 0)
+      if (grid->map[i][j] > 0)
       {
-        colour = rank[map[i][j]-1];
+        output->colour = output->rank[grid->map[i][j]-1];
 
-        if (colour >= *MAX)
+        if (output->colour >= p->MAX)
         {
-          colour = *MAX;
+          output->colour = p->MAX;
         }
       }
       else
       {
-        colour = *MAX;
+        output->colour = p->MAX;
       }
 
-      fprintf(input_file, " %4d", colour);
+      fprintf(output->fp2, " %4d", output->colour);
     }
 
-    fprintf(input_file,"\n");
+    fprintf(output->fp2,"\n");
   }
   
 }

@@ -1,28 +1,13 @@
+#include "command_line.h"
 
-
-struct command_line
-{
-  int L, seed, MAX, opt;
-  float rho;
-  char* datafile;
-  char* imagefile;
-  char* format_dat;
-  char* format_pgm; 
-};
-
+#ifndef _B_H_
+#define _B_H_
 struct percolation_related
 {
   int loop;
   int num_of_changes, old_num;
   int num_of_percclusters, perc_success;
   int top_row, bottom_row;  
-};
-
-struct output_related
-{
-  int *rank;
-  int num_of_clusters, maxsize;
-  int colour;
 };
 
 struct grid_related
@@ -33,14 +18,17 @@ struct grid_related
   float r;
 };
 
+#endif
 
-int judge_validation_of_command_lines(int L, int rho, int seed, int MAX);
-void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_name, char* imagefile_name);
-void create_map(float rho, int L, int **map);
-void init_extent_map(int **map, int L);
-int  set_unfilled_squares(int **map, int L, float rho);
-void set_unique_num(int **map, int L);
-void do_loop(int L, int **map);
-int  replace_square(int **map, int L);
-void result_of_percolate(int L,int **map);
-void judge_percolate(int *num_of_percclusters, int *perc_success, int **map, int L);
+
+
+
+
+void create_map(struct grid_related* grid, struct command_line* p);
+void init_extent_map(struct grid_related* grid, struct command_line* p);
+int set_unfilled_squares(struct grid_related* grid, struct command_line* p);
+void set_unique_num(struct grid_related* grid, struct command_line* p);
+void do_loop( struct percolation_related *percolate, struct grid_related* grid, struct command_line* p);
+int replace_square(struct percolation_related *percolate, struct grid_related* grid, struct command_line* p);
+void result_of_percolate(struct percolation_related *percolate, struct grid_related* grid, struct command_line* p);
+void judge_percolate(struct percolation_related *percolate, struct grid_related* grid, struct command_line* p);

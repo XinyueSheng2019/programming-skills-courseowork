@@ -9,153 +9,163 @@
 #include "uni.h"
 
 
-void percolate_processing(float rho, int L, int MAX, int seed, char* datafile_name, char* imagefile_name)
+void percolate_processing(struct command_line* p)
 {
   /*set an initial map, and then send the address of this map to every function for further usages.*/
+  struct grid_related grid_info;
+  struct grid_related *grid = NULL;
+  grid = &grid_info;
+  struct percolation_related percolate_info;
+  struct percolation_related *percolate = NULL;
+  percolate = &percolate_info;
+  struct output_related output_info;
+  struct output_related *output = NULL;
+  output = &output_info;
 
-  int** map; 
-  map = (int**)arralloc(sizeof(int), 2, L+2, L+2);
-  rinit(seed);
-  create_map(rho,L,(int**)map);
-  do_loop(L,(int**)map);
-  result_of_percolate(L,(int**)map);
-  print_datafile(L,(int**)map, datafile_name);
-  print_imagefile(L,MAX,(int**)map, imagefile_name); 
-  free(map);
+  grid->map = (int**)arralloc(sizeof(int), 2, p->L+2, p->L+2);
+  
+  rinit(p->seed);
+  create_map(grid, p);
+  do_loop(percolate, grid, p);
+  result_of_percolate(percolate, grid, p);
+  print_datafile(grid, p, output);
+  print_imagefile(grid,p, output); 
+  free(grid->map);
 }
 
 
-void create_map(float rho, int L, int **map)
+void create_map(struct grid_related* grid, struct command_line* p)
 {
   /* This function means to define the initial map. The rho and L are set by the user. */
 
   int i,j;
-  int num_of_unfilled;
+  // int num_of_unfilled;
   
-  init_extent_map((int**)map, L);
-  num_of_unfilled = set_unfilled_squares((int**)map, L, rho);
-  printf("rho = %f, actual density = %f\n",rho, 1.0 - ((double)num_of_unfilled)/((double) L*L) );
-  set_unique_num((int**)map, L);  
+  init_extent_map(grid, p);
+  grid->num_of_unfilled = set_unfilled_squares(grid, p);
+  printf("num of unfilled: %d\n",grid->num_of_unfilled);
+  printf("rho = %f, actual density = %f\n",p->rho, 1.0 - ((double)grid->num_of_unfilled)/((double)(p->L)*(p->L)));
+  set_unique_num(grid, p);  
 }
 
-void init_extent_map(int **map, int L)
+void init_extent_map(struct grid_related* grid, struct command_line* p)
 {
   /* Every square in this map with the extension length and width L+2, is set to 0.*/
 
   int i,j;
 
-  for (i = 0; i < L+2; i++)
+  for (i = 0; i < p->L+2; i++)
   {
-    for (j = 0; j < L+2; j++)
+    for (j = 0; j < p->L+2; j++)
     {
-      map[i][j] = 0;
+      grid->map[i][j] = 0;
     }
   }
 }
 
-int set_unfilled_squares(int **map, int L, float rho)
+int set_unfilled_squares(struct grid_related* grid, struct command_line* p)
 {
   /* By using random number(0~1) and comparing it with rho, the number and the coords of unfilled squares are set.
 And those unfilled squares are set to 1.*/
 
-  int num_of_unfilled = 0;
-  float r;
   int i,j;
-
-  for (i = 1; i <= L; i++)
+  grid->num_of_unfilled = 0;
+  for (i = 1; i <= p->L; i++)
   {
-    for (j = 1; j <= L; j++)
+    for (j = 1; j <= p->L; j++)
     {
-      r = random_uniform();
-      if(r > rho)
+      grid->r = random_uniform();
+      if(grid->r > p->rho)
       {
-        num_of_unfilled++;
-        map[i][j] = 1;
+        grid->num_of_unfilled++;
+        grid->map[i][j] = 1;
       }
     }
   }
-  return num_of_unfilled;
+  return grid->num_of_unfilled;
 }
 
-void set_unique_num(int **map, int L)
+void set_unique_num(struct grid_related* grid, struct command_line* p)
 {
   /* Calculate the number of unfilled squares, 
   and then change each of the unfilled squares with a unique positive integer.*/
 
   int i,j;
-  int unique_num=0;
+  grid->unique_num = 0;
 
-  for (i = 1; i <= L; i++)
+  for (i = 1; i <= p->L; i++)
   {
-    for (j = 1; j <= L; j++)
+    for (j = 1; j <= p->L; j++)
     {
-      if (map[i][j] != 0)
+      if (grid->map[i][j] != 0)
       {
-        unique_num++;
-        map[i][j] = unique_num;
+        grid->unique_num++;
+        grid->map[i][j] = grid->unique_num;
       }
     }
   }
 }
 
 
-void do_loop(int L, int **map)
+void do_loop( struct percolation_related *percolate, struct grid_related* grid, struct command_line* p)
 { 
 /* Loop over all the squares in the map many times, and during each pass of the loop we replace each square 
 with the maximum of its four neighbours. In all cases, we can ignore the filled (grey) squares. 
 The large numbers gradually fill the gaps so that each cluster eventually contains a single, unique number.*/
 
-  int loop = 1, num_of_changes = 1;
+  percolate->loop = 1;
+  percolate->num_of_changes = 1;
 
-  while (num_of_changes > 0)
+  while (percolate->num_of_changes > 0)
   {
-    num_of_changes = replace_square((int**)map, L);
-    printf("Number of changes on loop %d is %d\n", loop, num_of_changes);
-    loop++;
+    percolate->num_of_changes = replace_square(percolate, grid, p);
+    printf("Number of changes on loop %d is %d\n", percolate->loop, percolate->num_of_changes);
+    percolate->loop++;
   }
   
 }
 
-int replace_square(int **map, int L)
+int replace_square(struct percolation_related *percolate, struct grid_related* grid, struct command_line* p)
 {
   /* Replace each square with the maximum of its four neighbours*/
 
-  int i, j, old_num;
-  int num_of_changes = 0;
+  int i, j;
+  percolate->num_of_changes = 0;
 
-  for (i = 1; i <= L; i++)
+  for (i = 1; i <= p->L; i++)
   {
-    for (j = 1; j <= L; j++)
+    for (j = 1; j <= p->L; j++)
     {
-      if (map[i][j] != 0)
+      if (grid->map[i][j] != 0)
       {
-        old_num = map[i][j];
-        if (map[i-1][j] > map[i][j]) map[i][j] = map[i-1][j];
-        if (map[i+1][j] > map[i][j]) map[i][j] = map[i+1][j];
-        if (map[i][j-1] > map[i][j]) map[i][j] = map[i][j-1];
-        if (map[i][j+1] > map[i][j]) map[i][j] = map[i][j+1];
-        if (map[i][j] != old_num) num_of_changes++;    
+        percolate->old_num = grid->map[i][j];
+        if (grid->map[i-1][j] > grid->map[i][j]) grid->map[i][j] = grid->map[i-1][j];
+        if (grid->map[i+1][j] > grid->map[i][j]) grid->map[i][j] = grid->map[i+1][j];
+        if (grid->map[i][j-1] > grid->map[i][j]) grid->map[i][j] = grid->map[i][j-1];
+        if (grid->map[i][j+1] > grid->map[i][j]) grid->map[i][j] = grid->map[i][j+1];
+        if (grid->map[i][j] != percolate->old_num)  percolate->num_of_changes++;    
       }
     }
   }
-  return num_of_changes;
+  return  percolate->num_of_changes;
 }
 
 
 
-void result_of_percolate(int L,int **map)
+void result_of_percolate(struct percolation_related *percolate, struct grid_related* grid, struct command_line* p)
 {
 /* Calculate and print the results: whether clusters percolate the map, 
 if cluster does percolate, print the number of clusters which percolate the map;
 if cluster does not percolate, print this result.*/
 
-  int num_of_percclusters = 0, perc_success = 0;
+  percolate->num_of_percclusters = 0;
+  percolate->perc_success = 0;
 
-  judge_percolate(&num_of_percclusters, &perc_success, (int**)map, L);
+  judge_percolate(percolate,grid,p);
 
-  if (perc_success)
+  if (percolate->perc_success)
   {
-    printf("Cluster DOES percolate. Cluster number: %d\n", num_of_percclusters);
+    printf("Cluster DOES percolate. Cluster number: %d\n", percolate->num_of_percclusters);
   }
   else
   {
@@ -164,22 +174,20 @@ if cluster does not percolate, print this result.*/
 
 }
 
-void judge_percolate(int *num_of_percclusters, int *perc_success, int **map, int L)
+void judge_percolate(struct percolation_related *percolate, struct grid_related* grid, struct command_line* p)
 {
   /* Judge whether there is at least a cluster which percolates the map. */
 
-  int top_row, bottom_row;
-
-  for (top_row = 1; top_row <= L; top_row++)
+  for (percolate->top_row = 1; percolate->top_row <= p->L; percolate->top_row++)
   {
-    if (map[top_row][L] > 0)
+    if (grid->map[percolate->top_row][p->L] > 0)
     {
-      for (bottom_row = 1; bottom_row <= L; bottom_row++)
+      for (percolate->bottom_row = 1; percolate->bottom_row <= p->L; percolate->bottom_row++)
       {
-        if (map[top_row][L] == map[bottom_row][1])
+        if (grid->map[percolate->top_row][p->L] == grid->map[percolate->bottom_row][1])
         {
-          *perc_success = 1;
-          *num_of_percclusters = map[top_row][L];
+          percolate->perc_success = 1;
+          percolate->num_of_percclusters = grid->map[percolate->top_row][p->L];
         }
       }
     }
