@@ -13,8 +13,7 @@ void print_datafile(struct grid_related* grid, struct command_line* p, struct ou
 {
   /* Create a txt datafile with a user-defined name. Print the final map with digits in this file.*/
 
-  printf("Opening file <%s>\n", p->datafile_name);
-  // FILE *fp;
+  printf("Opening file </%s>\n", p->datafile_name);
   output->fp1 = fopen(p->datafile_name, "w");
   printf("Writing data ...\n");
   print_digitmap(grid,p,output);
@@ -46,6 +45,7 @@ void print_imagefile(struct grid_related* grid, struct command_line* p, struct o
   int i,j;
 
   output->fp2 = fopen(p->imagefile_name, "w");
+  
   printf("Opening file <%s>\n", p->imagefile_name);
 
   output->rank = (int*)arralloc(sizeof(int), 1, p->L * p->L);

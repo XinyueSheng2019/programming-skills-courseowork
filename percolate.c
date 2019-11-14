@@ -43,7 +43,6 @@ void create_map(struct grid_related* grid, struct command_line* p)
   
   init_extent_map(grid, p);
   grid->num_of_unfilled = set_unfilled_squares(grid, p);
-  printf("num of unfilled: %d\n",grid->num_of_unfilled);
   printf("rho = %f, actual density = %f\n",p->rho, 1.0 - ((double)grid->num_of_unfilled)/((double)(p->L)*(p->L)));
   set_unique_num(grid, p);  
 }

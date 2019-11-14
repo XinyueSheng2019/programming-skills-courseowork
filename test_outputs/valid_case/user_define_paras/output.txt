@@ -1,0 +1,105 @@
+**************************************
+Here are parameters:
+(Unset parameters have been given original values.)
+L   : 40
+rho : 0.300000
+seed: 500
+MAX : 50
+datafile_name : test.dat
+imagefile_name: test.pgm
+**************************************
+rho = 0.300000, actual density = 0.289375
+Number of changes on loop 1 is 1095
+Number of changes on loop 2 is 1064
+Number of changes on loop 3 is 1046
+Number of changes on loop 4 is 1049
+Number of changes on loop 5 is 1030
+Number of changes on loop 6 is 1022
+Number of changes on loop 7 is 1010
+Number of changes on loop 8 is 988
+Number of changes on loop 9 is 969
+Number of changes on loop 10 is 944
+Number of changes on loop 11 is 922
+Number of changes on loop 12 is 937
+Number of changes on loop 13 is 912
+Number of changes on loop 14 is 904
+Number of changes on loop 15 is 892
+Number of changes on loop 16 is 863
+Number of changes on loop 17 is 867
+Number of changes on loop 18 is 853
+Number of changes on loop 19 is 833
+Number of changes on loop 20 is 816
+Number of changes on loop 21 is 793
+Number of changes on loop 22 is 751
+Number of changes on loop 23 is 730
+Number of changes on loop 24 is 721
+Number of changes on loop 25 is 689
+Number of changes on loop 26 is 697
+Number of changes on loop 27 is 649
+Number of changes on loop 28 is 638
+Number of changes on loop 29 is 612
+Number of changes on loop 30 is 595
+Number of changes on loop 31 is 555
+Number of changes on loop 32 is 527
+Number of changes on loop 33 is 519
+Number of changes on loop 34 is 497
+Number of changes on loop 35 is 493
+Number of changes on loop 36 is 481
+Number of changes on loop 37 is 471
+Number of changes on loop 38 is 472
+Number of changes on loop 39 is 437
+Number of changes on loop 40 is 417
+Number of changes on loop 41 is 399
+Number of changes on loop 42 is 377
+Number of changes on loop 43 is 374
+Number of changes on loop 44 is 348
+Number of changes on loop 45 is 332
+Number of changes on loop 46 is 305
+Number of changes on loop 47 is 287
+Number of changes on loop 48 is 263
+Number of changes on loop 49 is 253
+Number of changes on loop 50 is 247
+Number of changes on loop 51 is 225
+Number of changes on loop 52 is 190
+Number of changes on loop 53 is 164
+Number of changes on loop 54 is 147
+Number of changes on loop 55 is 147
+Number of changes on loop 56 is 133
+Number of changes on loop 57 is 139
+Number of changes on loop 58 is 130
+Number of changes on loop 59 is 117
+Number of changes on loop 60 is 85
+Number of changes on loop 61 is 71
+Number of changes on loop 62 is 60
+Number of changes on loop 63 is 52
+Number of changes on loop 64 is 60
+Number of changes on loop 65 is 46
+Number of changes on loop 66 is 57
+Number of changes on loop 67 is 36
+Number of changes on loop 68 is 30
+Number of changes on loop 69 is 28
+Number of changes on loop 70 is 27
+Number of changes on loop 71 is 42
+Number of changes on loop 72 is 39
+Number of changes on loop 73 is 35
+Number of changes on loop 74 is 31
+Number of changes on loop 75 is 28
+Number of changes on loop 76 is 27
+Number of changes on loop 77 is 26
+Number of changes on loop 78 is 25
+Number of changes on loop 79 is 22
+Number of changes on loop 80 is 5
+Number of changes on loop 81 is 3
+Number of changes on loop 82 is 1
+Number of changes on loop 83 is 0
+Cluster DOES percolate. Cluster number: 1137
+Opening file </test.dat>
+Writing data ...
+...done
+File closed
+Opening file <test.pgm>
+Map has 17 clusters, maximum cluster size is 1096
+Displaying all clusters
+Writing data ...
+...done
+File closed

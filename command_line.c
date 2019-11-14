@@ -50,6 +50,7 @@ int main(int argc, char* argv[])
 
   printf("**************************************\nHere are parameters:\n(Unset parameters have been given original values.)\nL   : %d\nrho : %f\nseed: %d\nMAX : %d\ndatafile_name : %s\nimagefile_name: %s\n**************************************\n", p->L, p->rho, p->seed, p->MAX, p->datafile_name, p->imagefile_name);
 
+  // p->datafile_name = "output/" + p->datafile_name;
   percolate_processing(p);
 
   return 0;
