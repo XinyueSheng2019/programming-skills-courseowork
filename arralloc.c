@@ -8,7 +8,7 @@
 /*========================== Library include files ===========================*/
 #include <stddef.h>
 #include <stdarg.h>
-#include <malloc/malloc.h>
+#include <malloc.h>
 /*========================== Library declarations ============================*/
 /* char	*calloc(); */
 /* char	*malloc(); */
