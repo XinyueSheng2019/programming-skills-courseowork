@@ -1,0 +1,23 @@
+**************************************
+Here are parameters:
+(Unset parameters have been given original values.)
+L   : 1
+rho : 0.400000
+seed: 1564
+MAX : 1
+datafile_name : map.dat
+imagefile_name: map.pgm
+**************************************
+rho = 0.400000, actual density = 0.000000
+Number of changes on loop 1 is 0
+Cluster DOES percolate. Cluster number: 1
+Opening file </map.dat>
+Writing data ...
+...done
+File closed
+Opening file <map.pgm>
+Map has 1 clusters, maximum cluster size is 1
+Displaying the largest cluster
+Writing data ...
+...done
+File closed

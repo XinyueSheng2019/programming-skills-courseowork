@@ -4,15 +4,15 @@ OBJ = arralloc.o uni.o percolate.o percwrite.o command_line.o
 INC = arralloc.c uni.c percolate.c percwrite.c command_line.c
 
 .PHONY: calculate
-calculate: ${OBJ} percolate.out
+calculate: ${OBJ} percolate
 .c.o:
 	gcc -c $<
 
-percolate.out: ${OBJ} ${INC}
+percolate: ${OBJ} ${INC}
 	gcc ${OBJ} -o $@
 	rm *.o
 
 .PHONY: clean
 clean:
-	rm *.dat *.pgm  percolate.out 
+	rm *.dat *.pgm  percolate output*
 

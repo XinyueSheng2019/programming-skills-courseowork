@@ -1,0 +1,1 @@
+map width and height should be no less than 1. 
